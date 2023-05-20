@@ -3,21 +3,37 @@
 {% block body %}
 <h1 class="text-center text-danger mt-1">THỐNG KÊ - BÁO CÁO</h1>
 
+<!-- Báo cáo doanh thu theo tháng -->
 <div class="row">
     <div class="col-md-7 col-12">
-        <table class="table">
-            <tr>
-                <th>Id</th>
-                <th>Ten san pham</th>
-                <th>Doanh thu</th>
-            </tr>
-            {% for s in stats %}
-            <tr>
-                <td>{{ s[0] }}</td>
-                <td>{{ s[1] }}</td>
-                <td>{{ s[2] }} VND</td>
-            </tr>
-            {% endfor %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Thể loại sách</th>
+                    <th>Doanh thu</th>
+                    <th>Số lượt thuê</th>
+                    <th>Tỷ lệ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in stats %}
+                <tr>
+                    <td>{{ index }}</td>
+                    <td>{{ s[1] }}</td>
+                    <td>{{ s[2] }} VND</td>
+                    <td>{{ s[3] }}</td>
+                    <td>{{ s[4] }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5">
+                        Tổng doanh thu: {{ stats|sum(attribute='2') }} VND
+                    </td>
+                </tr>
+            </tfoot>
         </table>
     </div>
     <div class="col-md-5 col-12">
@@ -25,19 +41,29 @@
     </div>
 </div>
 
-<div class="row">
+<!-- Báo cáo tần suất sách bán -->
+<div class="row mt-4">
     <div class="col-md-7 col-12">
-        <table class="table">
-            <tr>
-                <th>Thoi gian</th>
-                <th>Doanh thu</th>
-            </tr>
-            {% for s in stats2 %}
-            <tr>
-                <td>{{ s[0] }}</td>
-                <td>{{ s[1] }} VND</td>
-            </tr>
-            {% endfor %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Tên sách</th>
+                    <th>Thể loại</th>
+                    <th>Số lượng</th>
+                    <th>Tỷ lệ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in stats2 %}
+                <tr>
+                    <td>{{ s[1] }}</td>
+                    <td>{{ s[2] }}</td>
+                    <td>{{ s[3] }}</td>
+                    <td>{{ s[4] }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
     </div>
     <div class="col-md-5 col-12">
@@ -71,18 +97,17 @@
 
     let data = [];
     let labels = [];
-
     let data2 = [];
     let labels2 = [];
 
     {% for s in stats %}
-    data.push({{ s[2] }})
-    labels.push('{{ s[1] }}')
+    data.push({{ s[2] }});
+    labels.push('{{ s[1] }}');
     {% endfor %}
 
     {% for s in stats2 %}
-    data2.push({{ s[1] }})
-    labels2.push({{ s[0] }})
+    data2.push({{ s[3] }});
+    labels2.push('{{ s[1] }}');
     {% endfor %}
 
     window.onload = function() {

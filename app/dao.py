@@ -1,4 +1,8 @@
-from app.models import User, Book, Bill, Bill_detail, Customer, Comment, Category
+from datetime import datetime
+
+from sqlalchemy import func
+
+from app.models import User, Book, Bill, Bill_detail, Customer, Comment, Category, Category_Book
 from flask_login import current_user
 import hashlib
 import cloudinary
@@ -86,7 +90,31 @@ def change_bill(book_id):
     bill.status=True
     db.session.commit()
 
+def revenue_stats_by_book():
+    return db.session.query(Book.id,Book.name, func.sum(Bill_detail.quantity * Bill_detail.price))\
+             .join(Bill_detail,Bill_detail.book_id.__eq__(Book.id)).group_by(Book.id).all()
 
+def revenue_stats_by_time(time='month', year=datetime.now().year):
+    return db.session.query(func.extract(time, Bill.createdate), func.sum(Bill_detail.quantity * Bill_detail.price))\
+             .join(Bill_detail, Bill_detail.bill_id.__eq__(Bill.id)) \
+             .group_by(func.extract(time, Bill.createdate)) \
+             .filter(func.extract('year', Bill.createdate).__eq__(year)) \
+             .order_by(func.extract(time, Bill.createdate)).all()
+
+def count_book_by_cate():
+    return db.session.query(
+        Category.id,
+        Category.name,
+        func.count(Category_Book.book_id)
+    ).join(
+        Category_Book, Category_Book.category_id.__eq__(Category.id), isouter=True
+    ).group_by(
+        Category.id, Category.name
+    ).all()
+
+if __name__ == '__main__':
+    with app.app_context():
+        print(count_book_by_cate())
 
 
 

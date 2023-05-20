@@ -63,8 +63,10 @@ class Book(db.Model):
     image = Column(String(1000), nullable=True)
     description= Column(Text,nullable=True)
     price=Column(Float,default=0)
+
     author_id = Column(Integer, ForeignKey(Author.id), nullable=False)#False moi dung
     publishinghouse_id = Column(Integer, ForeignKey(PublishingHouse.id), nullable= False)#False moi dung
+
     bill_details = relationship('Bill_detail', backref='book', lazy=True)
     category_book=relationship('Category_Book',backref='book', lazy=True)
     comments=relationship('Comment',backref='book',lazy=True)
@@ -122,8 +124,8 @@ if __name__=='__main__':
         # a1=Author(name='Conan Doyle')
         # a2=Author(name='Ina Garter')
         # a3=Author(name='Nguyễn Nhật Ánh')
-
-        # cb1=Category_Book(book_id=1,category_id=3)
+        #
+        # cb1 = Category_Book(book_id=1,category_id=3)
         # cb2 = Category_Book(book_id=1, category_id=2)
         # cb3 = Category_Book(book_id=2, category_id=3)
         # cb4 = Category_Book(book_id=2, category_id=4)
@@ -133,8 +135,8 @@ if __name__=='__main__':
 
 
         # p1=PublishingHouse(name="Nhi Dong")
-
-
+        #
+        #
         # b1=Book(name='Be Ready When the Luck Happens: A Memoir', image='https://m.media-amazon.com/images/I/81g+Hs6XF5L._SY425_.jpg',
         #         description='Here, for the first time, Ina Garten presents an intimate, entertaining, and inspiring account of her remarkable journey. Ina’s gift is to make everything look easy, yet all her accomplishments have been the result of hard work,',
         #         price=180000,
@@ -180,7 +182,7 @@ if __name__=='__main__':
         #           price=180000,
         #           author_id='1',
         #           publishinghouse_id='1')
-
+        #
         # db.session.add(p1)
         # db.session.add_all([a1,a2,a3])
         # db.session.add_all([b1,b2,b3,b4,b5,b7,b8])
@@ -208,11 +210,12 @@ if __name__=='__main__':
         # c2=Category(name='Hài Hước')
         # c3=Category(name='Khoa học')
         # db.session.add_all([c1,c2,c3,c])
+        # db.session.commit()
 
         # em=User(username='ngocbich',password=str(hashlib.md5('123456'.encode('utf-8')).hexdigest()),user_role=UserRole.EMPLOYEE)
-        em=Employee(id=4,name='Nguyễn Thị Ngọc Bích')
-        db.session.add(em)
+        # em=Employee(id=1,name='Nguyễn Thị Ngọc Bích')
+        # db.session.add(em)
         # db.session.add(guest)
-        db.session.commit()
+        # db.session.commit()
         # db.session.add(c)
         # db.session.commit()
