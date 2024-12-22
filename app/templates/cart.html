@@ -1,0 +1,41 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<h1 class="text-center text-danger mt-1">Giỏ hàng</h1>
+
+{% if 'cart' in session %}
+<table class="table">
+    <thead>
+    <tr>
+        <th>Book</th>
+        <th>name</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for b in session['cart'].values() %}
+    <tr>
+        <td>{{ b.id }}</td>
+        <td>{{ b.name }}</td>
+        <td>{{ "{:,.0f}".format(b.price) }}VNĐ</td>
+        <td>
+            <input type="number" value="{{b.quantity}}" onblur="updateCart({{b.id}},this)" class="form-control">
+        </td>
+        <td>
+            <button class="btn btn-danger">&times;</button>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<div class="alert alert-info">
+    <h3>Tổng sản phẩm: <span class="cart-counter">{{ cart_stats.total_quantity }}</span></h3>
+    <h3>Tổng tiền: <span class="cart-amount">{{ "{:,.0f}".format(cart_stats.total_amount) }} VNĐ</span></h3>
+</div>
+<div>
+    <button class="btn btn-success" onclick="pay()">Thanh toán</button>
+</div>
+{% else %}
+<div class="alert alert-info mt-1">Không có sản phẩm trong giỏ!</div>
+{% endif %}
+{% endblock %}

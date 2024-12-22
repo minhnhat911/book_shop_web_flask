@@ -1,0 +1,49 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+    <h2 class="text text-center text-danger mt-2">Hóa Đơn</h2>
+    <div class="d-flex me-auto">
+        <input type="text" placeholder="Nhập tên khách hàng">
+        <div class="employee-name me-2">Tên nhân viên: {{current_user.username}}</div>
+    </div>
+    <div>
+        <input type="number" placeholder="Nhập mã sản phẩm" onblur="addToBill(this)">
+        <button class="add" onclick="addToBill()">Thêm</button>
+    </div>
+
+    {% if 'bill' in session %}
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Book</th>
+            <th>name</th>
+            <th>Price</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for b in session['bill'].values() %}
+        <tr>
+            <td>{{ b.id }}</td>
+            <td>{{ b.name }}</td>
+            <td>{{ "{:,.0f}".format(b.price) }}VNĐ</td>
+            <td>
+                <input type="number" value="{{b.quantity}}" onblur="updateBill({{b.id}},this)" class="form-control">
+            </td>
+            <td>
+                <button class="btn btn-danger">&times;</button>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="alert alert-info">
+        <h3>Tổng sản phẩm: <span class="bill-counter">{{ bill_stats.total_quantity }}</span></h3>
+        <h3>Tổng tiền: <span class="bill-amount"> {{ "{:,.0f}".format(bill_stats.total_amount) }}VNĐ</span></h3>
+    </div>
+    <div>
+        <button class="btn btn-success" onclick="pay()">Thanh toán</button>
+    </div>
+    {% else %}
+    <div class="alert alert-info mt-1">Hãy nhập sách!</div>
+    {% endif %}
+{% endblock %}
