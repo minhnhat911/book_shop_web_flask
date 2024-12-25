@@ -14,7 +14,7 @@
     </thead>
     <tbody>
     {% for b in session['cart'].values() %}
-    <tr>
+    <tr id="cart{{ b.id }}">
         <td>{{ b.id }}</td>
         <td>{{ b.name }}</td>
         <td>{{ "{:,.0f}".format(b.price) }}VNĐ</td>
@@ -22,7 +22,7 @@
             <input type="number" value="{{b.quantity}}" onblur="updateCart({{b.id}},this)" class="form-control">
         </td>
         <td>
-            <button class="btn btn-danger">&times;</button>
+            <button class="btn btn-danger" onclick="deleteCart({{b.id}})">&times;</button>
         </td>
     </tr>
     {% endfor %}
@@ -34,6 +34,7 @@
 </div>
 <div>
     <button class="btn btn-success" onclick="pay()">Thanh toán</button>
+    <button class="btn btn-success" onclick="order()">Đặt hàng</button>
 </div>
 {% else %}
 <div class="alert alert-info mt-1">Không có sản phẩm trong giỏ!</div>

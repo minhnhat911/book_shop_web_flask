@@ -1,11 +1,12 @@
 from sqlalchemy.testing.suite.test_reflection import users
 
 from app import app, db
-from sqlalchemy import Column, Integer, String, Enum, ForeignKey, Float, Boolean, Text
+from sqlalchemy import Column, Integer, String, Enum, ForeignKey, Float, Boolean, Text,DateTime
 from flask_login import current_user
 from sqlalchemy.orm import relationship
 from enum import  Enum as RoleEnum
 from flask_login import UserMixin
+from datetime import datetime
 
 class UserRole(RoleEnum):
     ADMIN=1
@@ -28,17 +29,16 @@ class User(db.Model, UserMixin):
     password = Column(String(50), nullable=False)
     avatar=Column(String(100),default='https://res.cloudinary.com/dxxwcby8l/image/upload/v1647248722/r8sjly3st7estapvj19u.jpg')
     user_role=Column(Enum(UserRole),default=UserRole.CUSTOMER)
+    comment=relationship("Comment",backref='user',lazy=True)
 
 class Customer(db.Model):
     id=Column(Integer, ForeignKey(User.id), primary_key=True)
     name = Column(String(50), nullable=False)
-    address=Column(String(50))
     bills=relationship('Bill',backref='customer',lazy=True)
 
 class Employee(db.Model):
     id = Column(Integer, ForeignKey(User.id))
     name = Column(String(50), nullable=False,primary_key=True)
-    address = Column(String(50))
     bills = relationship('Bill', backref='employee', lazy=True)
 
 class Author(db.Model):
@@ -60,13 +60,14 @@ class Category(db.Model):
 class Book(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False)
-    image = Column(String(500), nullable=True)
-    description= Column(String(500),nullable=True)
+    image = Column(String(1000), nullable=True)
+    description= Column(Text,nullable=True)
     price=Column(Float,default=0)
     author_id = Column(Integer, ForeignKey(Author.id), nullable=False)#False moi dung
     publishinghouse_id = Column(Integer, ForeignKey(PublishingHouse.id), nullable= False)#False moi dung
     bill_details = relationship('Bill_detail', backref='book', lazy=True)
     category_book=relationship('Category_Book',backref='book', lazy=True)
+    comments=relationship('Comment',backref='book',lazy=True)
 
 class Category_Book(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -80,6 +81,7 @@ class Bill(db.Model):
     bill_details= relationship('Bill_detail', backref='bill', lazy=True)
     customer_id= Column(Integer, ForeignKey(Customer.id), nullable=False)
     employee_id=Column(Integer, ForeignKey(Employee.id),nullable=False)#lay 1 id default khi khach mua hang online
+    createdate= Column(DateTime,default=datetime.now())
 
 class Discount(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -91,12 +93,14 @@ class Bill_detail(db.Model):
     bill_id = Column(Integer, ForeignKey(Bill.id), nullable=False)
     quantity = Column(Integer, default=1)
     price=Column(Integer)
+
+
 class Comment(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
-    content=Column(Text)
-    customer_id= Column(Integer, ForeignKey(Customer.id), nullable=False)
-    book_id=Column(Integer,ForeignKey(Book.id),nullable=False)
-
+    content = Column(String(255), nullable=False)
+    created_date = Column(DateTime, default= datetime.now())
+    user_id = Column(Integer, ForeignKey(User.id), nullable=False)
+    book_id = Column(Integer, ForeignKey(Book.id), nullable=False)
 
 
 
@@ -104,22 +108,33 @@ class Comment(db.Model):
 if __name__=='__main__':
     with app.app_context():
         db.create_all()
-
         import hashlib
         # u=User(username='admin',password=str(hashlib.md5('admin'.encode('utf-8')).hexdigest()),user_role=UserRole.ADMIN)
+        # u = User(username='guest', password=str(hashlib.md5('guest'.encode('utf-8')).hexdigest()),
+        #          user_role=UserRole.CUSTOMER)
         # db.session.add(u)
         # db.session.commit()
 
+        # e=Employee(id=1,name='admin')
+        # db.session.add(e)
+        # db.session.commit()
+
         # a1=Author(name='Conan Doyle')
-        # a2=Author(name='khong bt')
-        # a3=Author(name='Nguyen Nhat Anh')
-        #
-        # c1=Category(name='Trinh Tham')
-        # c2=Category(name='Romance')
-        # c3=Category(name='Sport')
-        #
+        # a2=Author(name='Ina Garter')
+        # a3=Author(name='Nguyễn Nhật Ánh')
+
+        # cb1=Category_Book(book_id=1,category_id=3)
+        # cb2 = Category_Book(book_id=1, category_id=2)
+        # cb3 = Category_Book(book_id=2, category_id=3)
+        # cb4 = Category_Book(book_id=2, category_id=4)
+        # cb5 = Category_Book(book_id=3, category_id=3)
+        # db.session.add_all([cb1,cb2,cb3,cb4,cb5])
+        # db.session.commit()
+
+
         # p1=PublishingHouse(name="Nhi Dong")
-        # #
+
+
         # b1=Book(name='Be Ready When the Luck Happens: A Memoir', image='https://m.media-amazon.com/images/I/81g+Hs6XF5L._SY425_.jpg',
         #         description='Here, for the first time, Ina Garten presents an intimate, entertaining, and inspiring account of her remarkable journey. Ina’s gift is to make everything look easy, yet all her accomplishments have been the result of hard work,',
         #         price=180000,

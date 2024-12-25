@@ -9,7 +9,7 @@
             <div class="card-body m-3">
                 <h4 class="card-title">{{ b.name }}</h4>
                 <p class="card-text">{{ b.price }} VNĐ</p>
-                <a href="#" class="btn btn-primary">Xem chi tiết</a>
+                <a href="/book/{{b.id}}" class="btn btn-primary">Xem chi tiết</a>
                 <button class="btn btn-danger" onclick="addToCart({{ b.id }}, '{{ b.name }}', {{ b.price }})">Đặt hàng</button>
             </div>
         </div>

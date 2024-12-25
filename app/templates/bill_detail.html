@@ -6,31 +6,35 @@
         <input class="form-control me-2" name="bill_id" type="text" placeholder="Nhập id hóa đơn....">
         <button class="btn btn-primary" type="submit">Tìm</button>
     </form>
+    {% if bill %}
     <table class="table">
-    <thead>
-    <tr>
-        <th>Book</th>
-        <th>Quantity</th>
-        <th>Price</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for b in bill_details.values() %}
-    <tr>
-        <td>{{ b.name }}</td>
-        <td>{{ b.quantity }}</td>
-        <td>{{ b.price }}VNĐ</td>
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
-    {% if bill.status==False %}
-    <div class="d-flex">
-        <h2 class="text text-danger">Hóa đơn chưa thanh toán</h2>
-        <button class="btn btn-success" onclick="pay_bill()">Thanh toán</button>
-    </div>
-    {% else %}
+        <thead>
+        <tr>
+            <th>Book</th>
+            <th>Quantity</th>
+            <th>Price</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for b in bill_details.values() %}
+        <tr>
+            <td>{{ b.name }}</td>
+            <td>{{ b.quantity }}</td>
+            <td>{{ b.price }}VNĐ</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+        {% if bill.status==False %}
+        <div class="d-flex">
+            <h2 class="text text-danger">Hóa đơn chưa thanh toán</h2>
+            <button class="btn btn-success" onclick="pay_bill({{bill.id}})">Thanh toán</button>
+        </div>
+        {% else %}
         <h2 class="text text-danger">Hóa đơn đã thanh toán</h2>
+        {% endif %}
+    {% else %}
+    <div class="alert alert-info mt-1">KHÔNG TÌM THẤY HÓA ĐƠN!</div>
     {% endif %}
 </div>
 {% endblock %}

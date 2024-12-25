@@ -14,10 +14,12 @@ def annonymous_user(f):
 
     return decorated_func
 
-# def annonymous_employee(f):
-#     @wraps(f)
-#     def auth_employee(*args, **kwargs):
-#         if current_user.user_role:
-#             return redirect("/register")
-#         return f(*args, **kwargs)
-#     return auth_employee
+def annonymous_employee(f):
+    @wraps(f)
+    def auth_employee(*args, **kwargs):
+
+        if current_user.user_role==UserRole.CUSTOMER:
+            print(current_user.user_role)
+            return redirect("/")
+        return f(*args, **kwargs)
+    return auth_employee

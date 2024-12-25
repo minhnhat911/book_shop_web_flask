@@ -1,4 +1,4 @@
-from app.models import User, Book, Bill, Bill_detail, Customer
+from app.models import User, Book, Bill, Bill_detail, Customer, Comment, Category
 from flask_login import current_user
 import hashlib
 import cloudinary
@@ -22,9 +22,12 @@ def add_user(name,username,password,avatar=None):
     db.session.add(u)
     db.session.commit()
     id=u.id
-    c = Customer(id=id, name=name, address='dalat')
+    c = Customer(id=id, name=name)
     db.session.add(c)
     db.session.commit()
+
+def load_categories():
+    return Category.query.all()
 
 def load_book(book_id=None):
     if book_id:
@@ -32,10 +35,15 @@ def load_book(book_id=None):
     else:
         return Book.query.all()
 
-def save_bill(cart):
+def save_bill(cart,status=None):
     if cart:
-        b=Bill(customer_id=current_user.id,employee_id=5,status=True)
-        db.session.add(b)
+        if status:
+            b=Bill(customer_id=current_user.id,employee_id=1,status=True)
+            db.session.add(b)
+        else:
+            b = Bill(customer_id=current_user.id, employee_id=1, status=False)
+            db.session.add(b)
+
 
         for c in cart.values():
             d=Bill_detail(quantity=c['quantity'],price=c['price'],bill=b,book_id=c['id'])
@@ -51,6 +59,20 @@ def load_bill(id=None):
 def get_bookname(book_id):
     book=load_book(book_id)
     return book.name
+def add_comment(content, book_id):
+    c = Comment(content=content, book_id=book_id, user=current_user)
+    db.session.add(c)
+    db.session.commit()
+
+    return c
+
+def load_commments(book_id):
+    return Comment.query.filter(Comment.book_id.__eq__(book_id))
+
+def change_bill(book_id):
+    bill=get_bill(book_id)
+    bill.status=True
+    db.session.commit()
 
 
 

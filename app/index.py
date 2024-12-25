@@ -6,9 +6,9 @@ from flask import render_template, request, redirect, session,jsonify
 import dao
 from flask_login import login_user, logout_user, current_user, login_required
 import utils
-from app.dao import load_book, save_bill, get_bill, load_bill, get_bookname
-from app.utils import stats_cart, stats_bill
-from decorators import annonymous_user
+from app.dao import load_book, save_bill, get_bill, load_bill, get_bookname, change_bill
+from app.utils import stats_cart
+from decorators import annonymous_user,annonymous_employee
 
 
 @app.route("/")
@@ -91,6 +91,17 @@ def update_cart(product_id):
 
     session['cart']=cart
     return jsonify(utils.stats_cart(cart))
+
+@app.route("/api/carts/<book_id>", methods=['delete'])
+def delete_cart(book_id):
+    cart = session.get('cart')
+    if cart and book_id in cart:
+        del cart[book_id]
+
+        session['cart'] = cart
+
+    return jsonify(utils.stats_cart(cart))
+
 @app.route('/api/pay')
 def pay():
     cart=session.get('cart')
@@ -105,7 +116,24 @@ def pay():
         del session['cart']
 
     return jsonify({'status':200})
+
+@app.route('/api/order')
+def order():
+    cart=session.get('cart')
+    # import pdb
+    # pdb.set_trace()
+    status=False
+    try:
+        save_bill(cart,status)
+    except Exception as ex:
+        print(str(ex))
+        return jsonify({'status':500})
+    else:
+        del session['cart']
+
+    return jsonify({'status':200})
 @app.route("/bill")
+@annonymous_employee
 def bill():
     id=request.args.get('bill_id')
     bill=get_bill(id)
@@ -121,20 +149,19 @@ def bill():
         count=count+1
     return render_template('bill_detail.html',bill_details=d,bill=bill)
 
-@app.route("/api/pay_bill",methods=['put'])
+@app.route("/api/pay_bill",methods=['post','get'])
 def pay_bill():
-    # id=request.args.get(3)
-    bill=get_bill(3)
+    id=str(request.json.get('id'))
     try:
-        bill.status=True
+        change_bill(id)
     except:
         return jsonify({'status': 500})
 
     return jsonify({'status': 200})
 @app.route("/create_bill")
-# @annonymous_employee
+@annonymous_employee
 def create_bill():
-    bill_stats=utils.stats_bill(session.get('bill'))
+    bill_stats=utils.stats_cart(session.get('bill'))
     return render_template('create_bill.html',bill_stats=bill_stats)
 
 @app.route("/api/create_bill", methods=['post'])
@@ -159,23 +186,42 @@ def add_to_bill():
     session["bill"]=bill
     print(bill)
 
-    return jsonify(utils.stats_bill(bill=bill))
-@app.route("/api/create_bill/<book_id>",methods=['put'])
+    return jsonify(utils.stats_cart(cart=bill))
+@app.route('/api/create_bill/<book_id>',methods=['put'])
 def update_bill(book_id):
     bill=session.get('bill')
-
+    print(bill)
     if bill and book_id in bill:
         bill[book_id]["quantity"]=int(request.json['quantity'])
 
     session['bill']=bill
-    return jsonify(utils.stats_bill(bill))
+    print(stats_cart(cart=bill))
+    return jsonify(stats_cart(cart=bill))
 
+@app.route('/book/<int:book_id>')
+def details(book_id):
+    return render_template('details.html',
+                           book=dao.load_book(book_id),
+                           comments=dao.load_commments(book_id))
+@app.route('/api/book/<int:book_id>/comments', methods=['post'])
+@login_required
+def add_comment(book_id):
+    content = request.json.get('content')
+    c = dao.add_comment(content=content, book_id=book_id)
+
+    return jsonify({
+        "content": c.content,
+        "created_date": c.created_date,
+        "user": {
+            "avatar": c.user.avatar
+        }
+    })
 @app.context_processor
 def common_response():
     return {
-        'categories': dao.load_book(),
+        'categories': dao.load_categories(),
         'cart_stats': utils.stats_cart(session.get('cart')),
-        'bill_stats': utils.stats_bill(session.get('bill'))
+        'bill_stats': utils.stats_cart(session.get('bill'))
     }
 
 if __name__=='__main__':
