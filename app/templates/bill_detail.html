@@ -25,6 +25,10 @@
         {% endfor %}
         </tbody>
     </table>
+    <div class="alert alert-info">
+        <h3>Tổng sản phẩm: <span class="bill-counter">{{ count }}</span></h3>
+        <h3>Tổng tiền: <span class="bill-amount"> {{ "{:,.0f}".format(sum) }}VNĐ</span></h3>
+    </div>
         {% if bill.status==False %}
         <div class="d-flex">
             <h2 class="text text-danger">Hóa đơn chưa thanh toán</h2>

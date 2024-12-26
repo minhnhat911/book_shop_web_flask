@@ -28,6 +28,14 @@
                 <li class="nav-item">
                     <a class="nav-link text-success" href="/logout">Đăng xuất</a>
                 </li>
+                {% if current_user.user_role=='User.Customer' %}
+                     <li class="nav-item">
+                        <a class="nav-link text-success" href="/bill">Tra cứu hóa đơn</a>
+                    </li>
+                     <li class="nav-item">
+                        <a class="nav-link text-success" href="/create_bill">Tạo hóa đơn</a>
+                    </li>
+                {% endif %}
                 {% else %}
                 <li class="nav-item">
                     <a class="nav-link text-danger" href="/login">Đăng nhập</a>

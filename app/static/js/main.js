@@ -70,8 +70,9 @@ function deleteCart(bookId) {
 
 function order(){
     fetch("/api/order").then(res=>res.json()).then(data=>{
-        if(data.status===200)
-            location.reload();
+        if(data.status===200){
+            alert('Đặt sách thành công mã hóa đơn là: '+data.id)
+            location.reload();}
         else
             alert("Có lỗi xảy ra!")
     })

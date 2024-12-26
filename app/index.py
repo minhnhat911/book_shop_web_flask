@@ -1,3 +1,4 @@
+import math
 from itertools import product
 
 from click import confirm
@@ -6,15 +7,24 @@ from flask import render_template, request, redirect, session,jsonify
 import dao
 from flask_login import login_user, logout_user, current_user, login_required
 import utils
-from app.dao import load_book, save_bill, get_bill, load_bill, get_bookname, change_bill
+from app.dao import load_book, save_bill, get_bill, load_bill, get_bookname, change_bill, count_book
 from app.utils import stats_cart
 from decorators import annonymous_user,annonymous_employee
+from app.models import UserRole
+import admin
 
 
 @app.route("/")
 def index():
-    books=load_book()
-    return render_template('index.html',books=books)
+    page = request.args.get('page', 1)
+    cate_id = request.args.get('category_id')
+    kw = request.args.get('kw')
+    book = load_book(cate_id=cate_id, kw=kw, page=int(page))
+
+    page_size = app.config["PAGE_SIZE"]
+    total = count_book()
+
+    return render_template('index.html',books=book,pages=math.ceil(total/page_size))
 
 @app.route("/login", methods=['get','post'])
 @annonymous_user
@@ -26,8 +36,22 @@ def login_process():
         u=dao.auth_user(username=username, password=password)
         if u:
             login_user(u)
-            return redirect('/')
+
+
+            next = request.args.get('next')
+            return redirect(next if next else '/')
     return render_template('login.html')
+
+@app.route("/login-admin", methods=['post'])
+def login_admin_process():
+    username = request.form.get('username')
+    password = request.form.get('password')
+    u = dao.auth_user(username=username, password=password, role=UserRole.ADMIN)
+    if u:
+        login_user(u)
+
+    return redirect('/admin')
+
 
 @Login.user_loader #Nhiem vu,Tacdung ?
 def get_user(user_id):
@@ -39,6 +63,7 @@ def logout_process():
     return redirect('/login')
 
 @app.route("/register",methods=['get','post'])
+@annonymous_user
 def register_process():
     err_msg=None
     if request.method.__eq__('POST'):
@@ -124,14 +149,14 @@ def order():
     # pdb.set_trace()
     status=False
     try:
-        save_bill(cart,status)
+        id=save_bill(cart,status)
     except Exception as ex:
         print(str(ex))
         return jsonify({'status':500})
     else:
         del session['cart']
 
-    return jsonify({'status':200})
+    return jsonify({'status':200,'id':id})
 @app.route("/bill")
 @annonymous_employee
 def bill():
@@ -139,6 +164,7 @@ def bill():
     bill=get_bill(id)
     bill_details=load_bill(id)
     count=0
+    sum=0
     d={}
     for i in bill_details:
         d[count]={
@@ -147,7 +173,8 @@ def bill():
             "quantity":i.quantity
         }
         count=count+1
-    return render_template('bill_detail.html',bill_details=d,bill=bill)
+        sum+=i.price*i.quantity
+    return render_template('bill_detail.html',bill_details=d,bill=bill,count=count,sum=sum)
 
 @app.route("/api/pay_bill",methods=['post','get'])
 def pay_bill():
@@ -159,12 +186,14 @@ def pay_bill():
 
     return jsonify({'status': 200})
 @app.route("/create_bill")
+@login_required
 @annonymous_employee
 def create_bill():
     bill_stats=utils.stats_cart(session.get('bill'))
     return render_template('create_bill.html',bill_stats=bill_stats)
 
 @app.route("/api/create_bill", methods=['post'])
+@login_required
 def add_to_bill():
     bill=session.get('bill')
     try:

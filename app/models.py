@@ -208,6 +208,11 @@ if __name__=='__main__':
         # c2=Category(name='Hài Hước')
         # c3=Category(name='Khoa học')
         # db.session.add_all([c1,c2,c3,c])
-        # db.session.commit()
+
+        # em=User(username='ngocbich',password=str(hashlib.md5('123456'.encode('utf-8')).hexdigest()),user_role=UserRole.EMPLOYEE)
+        em=Employee(id=4,name='Nguyễn Thị Ngọc Bích')
+        db.session.add(em)
+        # db.session.add(guest)
+        db.session.commit()
         # db.session.add(c)
         # db.session.commit()
